@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import Login from "./Login";
+import Admin from "./componentes/AdminPanel";
+import Almacenero from "./componentes/AlmaceneroPanel";
+import Vendedor from "./componentes/VendedorPanel";
 
 function App() {
   const [usuarioLogeado, setUsuarioLogeado] = useState(null);
@@ -17,12 +20,10 @@ function App() {
         <Login onLoginSuccess={handleLoginSuccess} />
       ) : (
         <div>
-          <h2>Bienvenido {usuarioLogeado.nombre}</h2>
-          <p>Rol: {usuarioLogeado.rol}</p>
 
-          {usuarioLogeado.rol === "ADMIN" && <p>✅ Vista de administrador</p>}
-          {usuarioLogeado.rol === "ALMACENERO" && <p>📦 Vista de almacén</p>}
-          {usuarioLogeado.rol === "VENDEDOR" && <p>🛒 Vista de ventas</p>}
+          {usuarioLogeado.rol === "Administrador" && <Admin usuario={usuarioLogeado}/>}
+          {usuarioLogeado.rol === "Almacenero" && <Almacenero usuario={usuarioLogeado}/>}
+          {usuarioLogeado.rol === "Vendedor" && <Vendedor usuario={usuarioLogeado}/>}
         </div>
       )}
     </div>
