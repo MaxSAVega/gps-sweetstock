@@ -16,12 +16,13 @@ function Login(){
         body: JSON.stringify(data),
     })
         .then(async res => {
-            const text = await res.text();
+            const body = await res.json();
             if (!res.ok) {
-                alert("ERROR: " + text);
+                alert("ERROR: " + body);
                 return;
             }
-            alert("✅ " + text);
+            alert("✅ Bienvenido " + body.nombre + " (" +body.rol + ")" );
+            onLoginSuccess(body);
         })
         .catch(err => console.error(err));
     };

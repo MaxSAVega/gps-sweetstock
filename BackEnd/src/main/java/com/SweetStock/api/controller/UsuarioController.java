@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -39,6 +40,11 @@ public class UsuarioController {
         }
 
         // Si todo OK
-        return ResponseEntity.ok("Login exitoso");
+        return ResponseEntity.ok(Map.of(
+            "mensaje", "Login exitoso",
+            "rol", usuario.getRol(),
+            "id", usuario.getId(),
+            "nombre", usuario.getNombre()
+        ));
     }
 }
