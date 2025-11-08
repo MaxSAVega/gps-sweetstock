@@ -15,16 +15,18 @@ function Login({onLoginSuccess }){
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
     })
-        .then(async res => {
-            const body = await res.json();
-            if (!res.ok) {
-                alert("ERROR: " + body);
-                return;
-            }
-            alert("✅ Bienvenido " + body.nombre + " (" +body.rol + ")" );
-            onLoginSuccess(body);
-        })
-        .catch(err => console.error(err));
+        .then(async (res) => {
+        const mensaje = await res.text();
+        if (!res.ok) {
+        alert(mensaje);
+        throw new Error(mensaje);
+        }
+        return JSON.parse(mensaje);
+    })
+    .then((usuario) => {
+        onLoginSuccess(usuario);
+    })
+    .catch((err) => console.error(err));
     };
 
     return(

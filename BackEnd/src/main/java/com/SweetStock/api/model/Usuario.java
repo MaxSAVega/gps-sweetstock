@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDateTime;
+
 //import org.springframework.security.crypto.bycrypt.ByCryptPasswordEncoder;
 @Entity
 public class Usuario {
@@ -13,7 +15,10 @@ public class Usuario {
     private int id;
     private String nombre;
     private String password;
-    private String rol; 
+    private String rol;
+    private int intentosFallidos = 0;
+    private boolean cuentaBloqueada = false;
+    private LocalDateTime bloqueoHasta;
     
     public Usuario(){}
     
@@ -53,5 +58,29 @@ public class Usuario {
     
     public void setRol(String rol){
         this.rol = rol;
+    }
+    
+    public int getIntentosFallidos(){
+        return intentosFallidos;
+    }
+    
+    public void setIntentosFallidos(int intentosFallidos){
+        this.intentosFallidos = intentosFallidos;
+    }
+    
+    public boolean isCuentaBloqueada(){
+        return bloqueoHasta != null && LocalDateTime.now().isBefore(bloqueoHasta);
+    }
+    
+    public void setCuentaBloqueada(boolean cuentaBloqueada){
+        this.cuentaBloqueada = cuentaBloqueada;
+    }
+    
+    public LocalDateTime getBloqueoHasta() {
+        return bloqueoHasta;
+    }
+
+    public void setBloqueoHasta(LocalDateTime bloqueoHasta) {
+        this.bloqueoHasta = bloqueoHasta;
     }
 }

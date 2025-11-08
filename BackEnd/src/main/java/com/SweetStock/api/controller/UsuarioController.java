@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -29,16 +31,40 @@ public class UsuarioController {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNombre(request.getUsername());
 
         if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(401).body("Usuario no encontrado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
         }
-
+        
         Usuario usuario = usuarioOpt.get();
-
-        // ⚠️ TEMPORAL: comparación directa (luego lo cambiamos por BCrypt)
-        if (!usuario.getPassword().equals(request.getPassword())) {
-            return ResponseEntity.status(401).body("Contraseña incorrecta");
+        
+        // Verificar si está bloqueado actualmente
+        if (usuario.isCuentaBloqueada()) {
+            LocalDateTime finBloqueo = usuario.getBloqueoHasta();
+            String horaFormateada = finBloqueo.toLocalTime()
+                                    .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                   .body("Cuenta bloqueada temporalmente. Intenta nuevamente a las " + horaFormateada);
         }
 
+        // Verificar contraseña
+        // TEMPORAL: comparación directa (luego lo cambiamos por BCrypt)
+        if (!usuario.getPassword().equals(request.getPassword())) {
+            usuario.setIntentosFallidos(usuario.getIntentosFallidos() + 1);
+
+            if (usuario.getIntentosFallidos() >= 3) { // máximo 3 intentos
+                usuario.setBloqueoHasta(LocalDateTime.now().plusMinutes(10));
+                usuario.setIntentosFallidos(0); // Reinicia los intentos al bloquear
+                usuario.setCuentaBloqueada(true);
+            }
+
+            usuarioRepository.save(usuario);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Contraseña incorrecta");
+        }
+
+        // Si el login fue exitoso
+        usuario.setIntentosFallidos(0); // reinicia el contador
+        usuario.setBloqueoHasta(null); // elimina cualquier bloqueo previo
+        usuarioRepository.save(usuario);
+        
         // Si todo OK
         return ResponseEntity.ok(Map.of(
             "mensaje", "Login exitoso",
